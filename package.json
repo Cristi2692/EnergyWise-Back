@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node lib/index.js"
+    "start": "gulp"
   },
   "author": "",
   "license": "ISC",
@@ -27,5 +27,5 @@
     "swagger-node-express": "^1.2.3",
     "swagger-ui-express": "^5.0.0",
     "tedious": "^16.4.0"
-  }
+}
 }
