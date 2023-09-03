@@ -19,7 +19,7 @@ userController.addUser = async(req, res) => {
         return (user) ? res.sendStatus(201) : res.sendStatus(404);
     }catch(err){
         console.log(err.message);
-        throw new Error(err);
+        throw new Error(err.message);
     }
 };
 

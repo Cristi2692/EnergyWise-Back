@@ -30,10 +30,6 @@ Users.init({
         type: DataTypes.INTEGER, 
         allowNull: true,
     },
-    id_dispositivos:{
-        type:DataTypes.INTEGER,
-        allowNull:true,
-    },
     registerDate:{ 
         type: DataTypes.DATE, 
         allowNull: true 
