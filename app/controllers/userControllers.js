@@ -19,13 +19,13 @@ userController.addUser = async(req, res) => {
         return (user) ? res.sendStatus(201) : res.sendStatus(404);
     }catch(err){
         console.log(err.message);
-        throw new Error(err.message);
+        throw new Error(err);
     }
 };
 
 userController.loginUser = async (req, res) =>{
     const {email, password} = req.body;
-    if(!email || !password) return res.sendStatus(401);
+    if(!email || !password) return res.sendStatus(409);
 
     try{
         const user = await userQuery.getUserByEmail(email);

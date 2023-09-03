@@ -1,4 +1,5 @@
 const deviceQuery = require("../services/queries/deviceQuery");
+const moment = require("moment");
 
 const deviceController = {};
 
@@ -30,7 +31,7 @@ deviceController.delete_divice = async (req, res) =>{
     }catch(err){
         throw new Error(err);
     }
-}
+};
 
 deviceController.findAllDevices = async(req, res) =>{
     const {id} = req.params;
@@ -43,6 +44,33 @@ deviceController.findAllDevices = async(req, res) =>{
     throw new Error(err);
 };
 
+deviceController.device_activity = async(req, res) =>{
+    const {id} = req.params;
+    const {authorization} = req.headers;
+    if(!authorization) return res.sendStatus(401);
+
+    try{
+        function on(){
+            let hour = Math.floor(Math.random() * 24);
+            let min = Math.floor(Math.random() * 60);
+            return `${hour}:${min}`;
+        }
+        function off(){
+            let hour = Math.floor(Math.random() * 24);
+            let min = Math.floor(Math.random() * 60);
+            return `${hour}:${min}`;
+        }
+        
+        let lastOn = on();
+        let lastOff = off();
+
+        await deviceQuery.consumption(id, lastOn, lastOff);
+        const addConsumption = await deviceQuery.getIdDevice(id)
+        return (addConsumption) ? res.sendStatus(200) : res.sendStatus(500);
+    }catch(err){
+        throw new Error(err)
+    }
+};
 
 
 module.exports = deviceController;

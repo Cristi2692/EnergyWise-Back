@@ -1,13 +1,13 @@
 const moment = require("moment");
-const {Devices} = require("../../context/context");
+const {Devices, Devices_consumption} = require("../../context/context");
 
 const deviceQuery = {};
 
 deviceQuery.getDeviceReference = async(reference)=> {
-    let refDivice;
+    let refDevice;
     try{
-        refDivice = await Devices.findOne({ where: {reference: reference} });
-        return (refDivice === null) ? console.log('Not found!') : refDivice;
+        refDevice = await Devices.findOne({ where: {reference: reference} });
+        return (refDevice === null) ? console.log('Not found!') : refDevice;
     }catch(err){
         throw new Error(err);
     }
@@ -39,6 +39,31 @@ deviceQuery.delete_device = async(id) =>{
     try{
         deleteDiv = await Devices.destroy({ where: {id: id} });
         return (deleteDiv) ? console.log('Not found!') : deleteDiv;
+    }catch(err){
+        throw new Error(err);
+    }
+};
+
+deviceQuery.consumption = async(id, lastOn, lastOff) =>{
+    let deviceConsumption;
+    try{
+        deviceConsumption = await Devices_consumption.build({
+            id_devices: id,
+            lastOn: lastOn,
+            lastOff: lastOff,
+            date:moment().format("YYYY-DD-MM")
+        });
+        await deviceConsumption.save();
+    }catch(err){
+        throw new Error(err);
+    }
+};
+
+deviceQuery.getIdDevice = async(id)=> {
+    let device;
+    try{
+        device = await Devices_consumption.findOne({ where: { id_devices: id } });
+        return (device === null) ? console.log('Not found!') : device;
     }catch(err){
         throw new Error(err);
     }

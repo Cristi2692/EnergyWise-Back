@@ -5,9 +5,9 @@ class Users extends Model {};
 Users.init({
     id:{
         type: DataTypes.INTEGER,
-        allowNull: false, 
         autoIncrement: true, 
-        primaryKey:true 
+        primaryKey:true,
+        allowNull: false, 
     },
     name: { 
         type: DataTypes.STRING, 
@@ -111,14 +111,6 @@ Devices.init({
         type: DataTypes.STRING,
         allowNull:false,
     },
-    last_on:{
-        type:DataTypes.DATE,
-        allowNull:true,
-    },
-    last_off:{
-        type: DataTypes.DATE,
-        allowNull: true
-    },
     id_user:{
         type: DataTypes.INTEGER,
         allowNull:true,
@@ -151,12 +143,16 @@ Devices_consumption.init({
         type: DataTypes.INTEGER,
         allowNull:false,
     },
-    fecha:{
+    date:{
         type: DataTypes.DATEONLY,
         allowNull:false,
     },
-    hora:{
-        type: DataTypes.DATE,
+    lastOn:{
+        type: DataTypes.TIME,
+        allowNull: false,
+    },
+    lastOff:{
+        type: DataTypes.TIME,
         allowNull: false,
     }
 },{

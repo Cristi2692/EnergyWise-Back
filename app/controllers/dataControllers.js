@@ -4,8 +4,7 @@ const dataQuery = require("../services/queries/dataQuery");
 
 const dataController= {};
 
-dataController.allData = async(req, res) =>{
-
+const allprices = async() => {
     try{
         let data = await fetch("https://api.preciodelaluz.org/v1/prices/all?zone=PCB");
         let response = await data.json();
@@ -19,7 +18,25 @@ dataController.allData = async(req, res) =>{
         });
         if(totalData.length === 0) return res.sendStatus(401);
         await dataQuery.addPrices_control(totalData);
-            return res.sendStatus(200);
+    }catch(err){
+        console.log(err.message);
+        throw new Error
+    }
+};
+
+dataController.allData = async(req, res) =>{
+    try{
+        let data = await fetch("https://api.preciodelaluz.org/v1/prices/all?zone=PCB");
+        let response = await data.json();
+        const totalData = Object.values(response).map((element)=>{
+            dataQuery.addPrices_control(element)
+            return {
+                date: element.date,
+                hour: element.hour,
+                price: element.price/1000
+            }
+        });
+        return (totalData.length === 0) ? res.sendStatus(500) : res.json(totalData);
     }catch(err){
         console.log(err.message);
         throw new Error
@@ -46,14 +63,10 @@ const responses = await Promise.all(requests.map((request) => fetch(request.url)
         }catch(err){
             throw new Error(err);
     }
-    };
+};
 
 cron.schedule('0 0 * * *', () => {
-    dataController.allData();
-});
-
-cron.schedule('0 0 * * *', () => {
-    dataController.electricPrice();
+    allprices();
 });
 
 module.exports = dataController;
