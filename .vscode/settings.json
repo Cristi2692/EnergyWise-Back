@@ -2,5 +2,7 @@
     "appService.zipIgnorePattern": [
         "node_modules{,/**}",
         ".vscode{,/**}"
-    ]
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/d75a864b-b30c-44d1-a1e5-0cc42ed9c5b3/resourceGroups/energywisegroup/providers/Microsoft.Web/sites/energywiseback",
+    "appService.deploySubpath": "."
 }
