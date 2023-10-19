@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const moment = require("moment");
-const {Users} = require("../../context/context");
+const {Users, Devices} = require("../../context/context");
 const utils = require("../../utils/utils");
 
 const userQuery = {};
@@ -41,15 +41,33 @@ userQuery.getUserById = async(id) => {
     };
 };
 
-userQuery.deleteUser = async (id) =>{
+userQuery.deleteUser = async (id, activo) =>{
     let deleteUser;
     try{
-        deleteUser = await Users.destroy({ where: { id:id} });
-        return (deleteUser === null) ? console.log('Not found!') : deleteUser;
+        deleteUser = await Users.update({
+            activo:activo,
+        }, 
+        {where:{id:id}});
+        deleteUser = await utils.removeUndefinedKeys(deleteUser);
     }catch(err){
         throw new Error(err);
     }
 };
+
+userQuery.deleteDevForUser = async (id, activo) =>{
+    let deleteUser;
+    try{
+        deleteUser = await Devices.update({
+            activo:activo,
+        }, 
+        {where:{id:id}});
+        deleteUser = await utils.removeUndefinedKeys(deleteUser);
+    }catch(err){
+        throw new Error(err);
+    }
+};
+
+
 
 userQuery.updateUser = async (id, userData) => {
     let update;

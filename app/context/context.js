@@ -30,6 +30,10 @@ Users.init({
         type: DataTypes.INTEGER, 
         allowNull: true,
     },
+    activo:{
+        type:DataTypes.STRING,
+        allowNull: true,
+    },
     registerDate:{ 
         type: DataTypes.DATE, 
         allowNull: true 
@@ -68,32 +72,27 @@ Role.init({
     freezeTableName: true
 });
 
-class Prices_control extends Model {};
-Prices_control.init({
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-        allowNull: false,
-    },
-    date:{
+class Historic_prices extends Model {};
+Historic_prices.init({
+    hora:{
         type: DataTypes.STRING,
         allowNull: true,
     },
-    hour:{
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    price:{
+    precio:{
         type: DataTypes.DECIMAL,
+        allowNull: true,
+    },
+    fecha:{
+        type: DataTypes.DATEONLY,
         allowNull: true,
     },
 },{
     sequelize,
-    modelName: 'Prices_control',
+    modelName: 'Historic_prices',
     timestamps: false,
     freezeTableName: true
 });
+Historic_prices.removeAttribute('id');
 
 class Devices extends Model {};
 Devices.init({
@@ -103,26 +102,38 @@ Devices.init({
         autoIncrement: true,
         allowNull: false,
     },
+    idUser:{
+        type: DataTypes.INTEGER,
+        allowNull:true,
+    },
+    idDevModel:{
+        type: DataTypes.INTEGER,
+        allowNull:false,
+    },
     name:{
         type: DataTypes.STRING,
         allowNull:false,
     },
-    reference:{
+    tag:{
         type: DataTypes.STRING,
-        allowNull:false,
+        allowNull: true,
     },
-    id_user:{
-        type: DataTypes.INTEGER,
-        allowNull:true,
+    activo:{
+        type:DataTypes.STRING,
+        allowNull: true,
     },
-    register_date:{
+    state:{
+        type:DataTypes.STRING,
+        allowNull: true,
+    },
+    registerDate:{
         type: DataTypes.DATE,
-        allowNull: true
+        allowNull: true,
     },
-    modification_date:{
+    modificationDate:{
         type: DataTypes.DATE,
-        allowNull: true
-    }
+        allowNull: true,
+    },
     
 },{
     sequelize,
@@ -139,38 +150,127 @@ Devices_consumption.init({
         autoIncrement: true,
         allowNull: false,
     },
-    id_devices:{
-        type: DataTypes.INTEGER,
-        allowNull:false,
-    },
-    date:{
-        type: DataTypes.DATEONLY,
-        allowNull:false,
-    },
     lastOn:{
-        type: DataTypes.TIME,
-        allowNull: false,
+        type: DataTypes.DATE,
+        allowNull: true,
     },
     lastOff:{
-        type: DataTypes.TIME,
-        allowNull: false,
-    }
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    totalTime:{
+        type: DataTypes.FLOAT,
+        allowNull: true,
+    },
+    totalKwh:{
+        type: DataTypes.FLOAT,
+        allowNull: true,
+    },
+    idDevModel:{
+        type: DataTypes.INTEGER,
+        allowNull:true,
+    },
+    idDevice:{
+        type: DataTypes.INTEGER,
+        allowNull:true,
+    },
+    totalMoney:{
+        type: DataTypes.DECIMAL,
+        allowNull:true,
+    },
 },{
     sequelize,
     modelName: 'Devices_consumption',
     timestamps: false,
-    freezeTableName: true
-})
+    freezeTableName: true,
+});
+
+class Device_models extends Model{}
+Device_models.init({
+    id:{
+        type: DataTypes.INTEGER,
+        allowNull:false,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    variable:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    brand:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    model:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    kwh_hour:{
+        type: DataTypes.FLOAT,
+        allowNull: true,
+    },
+    images:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+},{
+    sequelize,
+    modelName: 'Device_models',
+    timestamps: false,
+    freezeTableName: true,
+});
+
+class Task extends Model{};
+Task.init({
+    id:{
+        type:DataTypes.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey:true
+    },
+    idDevice:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    programTime:{
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
+    operationType:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    status:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    idDevModel:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+},{
+    sequelize,
+    modelName: 'Task',
+    timestamps: false,
+    freezeTableName: true,
+});
 
 
 Role.hasMany(Users, {as:'user', foreignKey:'idRole'});
 Users.belongsTo(Role,{foreignKey:'idRole'});
 
-Users.hasMany(Devices, {as:'devices', foreignKey: 'id_user'})
-Devices.belongsTo(Users,{foreignKey:'id_user'});
+Users.hasMany(Devices, {as:'devices', foreignKey: 'idUser'});
+Devices.belongsTo(Users,{foreignKey:'idUser'}); // preguntar por esta relacion
 
-Devices.hasMany(Devices_consumption, {as: 'devices_consumption', foreignKey: 'id_devices'})
-Devices_consumption.belongsTo(Devices, {foreignKey:'id_devices'});
+Device_models.hasMany(Devices, {as: 'devices', foreignKey: 'idDevModel'});
+Devices.belongsTo(Device_models, {foreignKey:'idDevModel'});
+
+Devices.hasMany(Devices_consumption, {as: 'device_consumption', foreignKey: 'idDevice'});
+Devices_consumption.belongsTo(Devices, {foreignKey:'idDevice'});
+
+Device_models.hasMany(Devices_consumption, {as:'devices_consumption', foreignKey: 'idDevModel'});
+Devices_consumption.belongsTo(Device_models, {foreignKey:'idDevModel'});
 
 
-module.exports = {Users, Role, Prices_control, Devices, Devices_consumption};
+
+module.exports = {Users, Role, Historic_prices, Devices, Devices_consumption, Device_models, Task};

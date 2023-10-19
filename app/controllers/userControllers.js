@@ -2,7 +2,8 @@
 const bcrypt = require("bcryptjs");
 const { SignJWT, jwtVerify } = require("jose");
 const userQuery = require("../services/queries/userQuery");
-const utils = require("../utils/utils");
+const deviceQuery = require("../services/queries/deviceQuery");
+const httpContext = require("express-http-context");
 
 
 const userController= {};
@@ -29,14 +30,15 @@ userController.loginUser = async (req, res) =>{
 
     try{
         const user = await userQuery.getUserByEmail(email);
-        if(!user) return res.sendStatus(404);
+        if(user.activo != process.env.ACTIVO) return res.sendStatus(403);
         let verifyPass = await bcrypt.compare(password, user.password)
         if(verifyPass === false) return res.sendStatus(401);
         const jwtConstructor= new SignJWT({
             id: user.id,
             name:user.name,
             surname: user.surname,
-            email: user.email
+            email: user.email,
+            activo: user.activo,
         });
         const encoder= new TextEncoder();
         const token = await jwtConstructor
@@ -49,48 +51,30 @@ userController.loginUser = async (req, res) =>{
         console.log(err.message);
         return res.sendStatus(401);
     }
-}
+};
 
 userController.deleteUser = async (req, res) => {
-    const {id} = req.params;
-    const {authorization} = req.headers;
-
-    let user = await userQuery.getUserById(id);
-    if(user === await utils.verifyToken(id, authorization)) return res.sendStatus(404);
+    let user = httpContext.get("user"); // aca debo pedir la id del modelo que tiene para enviarle la foto que corresponde.
     try{
-        const deletteUser = await userQuery.deleteUser(id);
-        return (!deletteUser) ? res.sendStatus(500) : res.sendStatus(200);
+        await deviceQuery.deleteDevByIduser(user, process.env.INACTIVO);
+        await userQuery.deleteUser(user, process.env.INACTIVO);
+        return res.sendStatus(200);
     }catch(err){
         throw new Error(err);
     }
 };
 
 userController.updateUser = async(req, res) =>{
-    const {id} = req.params;
+    let userFind = httpContext.get("user");
     const {email} = req.body;
-    const {authorization} = req.headers;
-    
-    if(!authorization) return sendStatus(401);
-    if(Object.entries(req.body).length === 0) return res.sendStatus(400);
-    const token = authorization.split(" ")[1];
-    
     try{ 
-        const encoder = new TextEncoder();
-        const { payload } = await jwtVerify(
-            token,
-            encoder.encode(process.env.JWT_SECRET));
-            console.log(payload);
-            const user = await userQuery.getUserById(id);
-
+            const user = await userQuery.getUserById(userFind);
             if(email && user.email !== email){
                 const newUserEmail = await userQuery.getUserByEmail(email);
             if(newUserEmail) return res.sendStatus(409);
             }
-            
-            if(payload.id !== Number(id)) return res.sendStatus(401);
-            
-            await userQuery.updateUser(id, req.body);
-            const updateUser = await userQuery.getUserById(id);
+            await userQuery.updateUser(userFind, req.body);
+            const updateUser = await userQuery.getUserById(userFind);
             return (updateUser) ? res.json(updateUser) : res.sendStatus(500);
     }catch(err){
         console.log(err.message);
@@ -99,20 +83,11 @@ userController.updateUser = async(req, res) =>{
 };
 
 userController.tokenInfo = async (req, res) => {
-    const { authorization } = req.headers;
-
-    if (!authorization) return res.sendStatus(401);
-    const token = authorization.split(" ")[1];
+    let userFind = httpContext.get("user");
     try {
-        const encoder = new TextEncoder();
-        const { payload } = await jwtVerify(
-            token,
-            encoder.encode(process.env.JWT_SECRET)
-        );
-        const user= await userQuery.getUserById(payload.id);
+        const user= await userQuery.getUserById(userFind);
         if(user){
             res.json({
-                id: user.id,
                 name: user.name,
                 surname: user.surname,
                 email: user.email
@@ -121,10 +96,8 @@ userController.tokenInfo = async (req, res) => {
             res.sendStatus(404);
         }
     } catch (err) {
-        console.log(err.message);
         throw new Error(err);
     };
 };
-
 
 module.exports = userController;

@@ -1,13 +1,15 @@
 const express = require("express");
-const deviceController = require("../controllers/deviceControllers");
+const {deviceController} = require("../controllers/deviceControllers");
+const {requestContext} = require("../midlewares/authorizationContext")
 
 const deviceRouter = express.Router();
 
-deviceRouter.post("/:id",deviceController.add_device); // agregar dispositivo
-deviceRouter.delete("/:id",deviceController.delete_divice); // eliminar dispositivo
-deviceRouter.get("/:id",deviceController.findAllDevices); // encontar dispositivos con el mismo id_user
-deviceRouter.get("/consumo/:id",deviceController.device_activity); // agregar consumo de dispositivo
 
+deviceRouter.post("/",requestContext,deviceController.switchDevice);
+deviceRouter.post("/dev",requestContext, deviceController.add_device); // agregar dispositivo
+deviceRouter.get("/findDev",requestContext, deviceController.findAllDevices); // encontar dispositivos con el mismo idUser
+deviceRouter.post("/model",deviceController.totalmodels); // enviar catalogo de dispositivos
+deviceRouter.delete("/delete",requestContext,deviceController.delete_device); // eliminar dispositivo
+deviceRouter.patch("/uploadImage",deviceController.addImage); // subir imagen
 
-
-module.exports= deviceRouter;
+module.exports = deviceRouter;

@@ -1,17 +1,17 @@
-const {Prices_control} = require("../../context/context");
+const {Historic_prices} = require("../../context/context");
+const moment = require("moment");
 
 const dataQuery = {};
 
 dataQuery.addPrices_control = async(dataPrice) => {
     let data;
     try{
-        data = await Prices_control.build({
-        date: dataPrice.date,
-        hour: dataPrice.hour,
-        price: dataPrice.price/1000
+        data = await Historic_prices.create({
+        fecha: new Date(dataPrice.date.split("-").reverse().join("-")),
+        hora: dataPrice.hour,
+        precio: dataPrice.price,    //parseFloat(String(dataPrice.price).replace(".", ",")),
         });
         console.log(data);
-        await data.save();
     }catch(err){
         throw new Error(err);
     }
